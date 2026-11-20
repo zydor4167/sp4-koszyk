@@ -1,122 +1,111 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const products = [
+    { id: 1, nazwa: 'Notes', cena: 12.50 },
+    { id: 2, nazwa: 'Długopis', cena: 3.20 },
+    { id: 3, nazwa: 'Plecak', cena: 89.00 },
+    { id: 4, nazwa: 'Kalkulator', cena: 45.90 },
+    { id: 5, nazwa: 'Zakreślacz', cena: 4.75 }
+  ];
+
+  const [cart, setCart] = useState([]);
+
+  const calculateTotal = (items) => {
+    return items.reduce((sum, item) => sum + item.cena * item.ilosc, 0);
+  };
+
+  const logCartState = (updatedCart) => {
+    const total = calculateTotal(updatedCart);
+    console.log(`Koszyk: ${updatedCart.length} pozycji; suma: ${total.toFixed(2)}`);
+  };
+
+  const handleAddToCart = (product) => {
+    const existingItem = cart.find((item) => item.id === product.id);
+    let updatedCart;
+
+    if (existingItem) {
+      updatedCart = cart.map((item) =>
+        item.id === product.id ? { ...item, ilosc: item.ilosc + 1 } : item
+      );
+    } else {
+      updatedCart = [...cart, { ...product, ilosc: 1 }];
+    }
+
+    setCart(updatedCart);
+    logCartState(updatedCart);
+  };
+
+  const handleRemoveFromCart = (id) => {
+    const updatedCart = cart.filter((item) => item.id !== id);
+    setCart(updatedCart);
+    logCartState(updatedCart);
+  };
+
+  const totalSum = calculateTotal(cart);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started elo</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="container mt-4">
+      <h2>Sklepik szkolny</h2>
+      <ul className="list-group mb-4">
+        {products.map((product) => (
+          <li
+            key={product.id}
+            className="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {product.nazwa} – {product.cena.toFixed(2)} zł
+            <button
+              type="button"
+              className="btn btn-sm btn-primary"
+              onClick={() => handleAddToCart(product)}
+            >
+              Do koszyka
+            </button>
+          </li>
+        ))}
+      </ul>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <h3>Koszyk ({cart.length} pozycji)</h3>
+      {cart.length === 0 ? (
+        <div className="alert alert-info">Koszyk jest pusty</div>
+      ) : (
+        <>
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">Produkt</th>
+                <th scope="col">Ilość</th>
+                <th scope="col">Cena</th>
+                <th scope="col">Suma</th>
+                <th scope="col">Akcja</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cart.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.nazwa}</td>
+                  <td>{item.ilosc}</td>
+                  <td>{item.cena.toFixed(2)} zł</td>
+                  <td>{(item.cena * item.ilosc).toFixed(2)} zł</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleRemoveFromCart(item.id)}
+                    >
+                      Usuń
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="fw-bold">Suma: {totalSum.toFixed(2)} zł</p>
+        </>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
